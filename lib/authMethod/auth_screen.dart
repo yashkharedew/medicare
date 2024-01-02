@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -29,6 +30,30 @@ class _AuthScreenState extends State<AuthScreen> {
       borderRadius: BorderRadius.all(Radius.circular(2)),
     ),
   );
+
+  void submitAuth(email, password, username) async {
+    final credential;
+    try {
+      if (isSignIn) {
+        credential = (await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        ));
+      } else {
+        credential =
+            (await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        ));
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('The account already exists for that email.');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,21 +164,16 @@ class _AuthScreenState extends State<AuthScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: raisedButtonStyle,
-                  onPressed: () {
+                  onPressed: () async {
                     // Validate returns true if the form is valid, or false otherwise.
-                    // if (_formKey.currentState!.validate()) {
-                    //   // If the form is valid, display a snackbar. In the real world,
-                    //   // you'd often call a server or save the information in a database.
-                    //   ScaffoldMessenger.of(context).showSnackBar(
-                    //     const SnackBar(content: Text('Processing Data')),
-                    //   );
-                    //   submitAuth(_username, _email, _password);
-                    // } else {
-                    //   ScaffoldMessenger.of(context).showSnackBar(
-                    //     const SnackBar(
-                    //         content: Text('Incorrect! Please fill it again')),
-                    //   );
-                    // }
+                    final validate = await _formKey.currentState!.validate();
+                    if (!validate) {
+                      print("You have filled Invalid credentials");
+                    } else {
+                      _formKey.currentState!.save();
+                      submitAuth(_email, _password, _username);
+                    }
+                    // submitAuth(_username, _email, _password);
                   },
                   child: isSignIn ? Text('Login') : Text('Sign Up'),
                 ),
@@ -178,10 +198,5 @@ class _AuthScreenState extends State<AuthScreen> {
         )
       ],
     );
-  }
-
-// Authentication method on button submit
-  void submitAuth(email, password, username) {
-    try {} catch (e) {}
   }
 }
