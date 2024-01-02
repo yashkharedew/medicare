@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:medicare/authMethod/auth_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,6 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Messages',
           ),
         ],
+      ),
+      body: Container(
+        padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+        child: AuthScreen(),
       ),
     );
   }
